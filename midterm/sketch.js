@@ -1,31 +1,37 @@
 //colors
 var skyBlue = '#b0d6f5';
-var lightGreen = '#68864f';
-var mediumGreen = '#486433';
 var darkGreen = '#314a1d';
 var mossGreen = '#8b8b3b';
-var darkBrown = '#494122';
-var lightBrown = '#494122';
 var slateGray = '#686d66';
-var mushroomRed = '#DB1616';
 var mushroomWhite = '#FEFACB';
 
 var cloudX = 0;
+var mushroomList = []; //array to store mushrooms
+var mushroomColors = ['#DB1616', '#ff8c00', '#3783ff', '#fb7efd', '#7442c8']; // array of mushroom colors
+var mushroomCount = 0;
 
 function setup() {
   createCanvas(600, 600);
-  background(skyBlue); //sky
   noStroke();
+  mushroomCounter = createElement('p', 'mushrooms picked: ' + mushroomCount);
+  mushroomCounter.position(400, -5);
 
-  mushy = new Mushroom(100, 400);
-  agaric = new Mushroom(350, 500);
+  resetButton = createButton('regrow the mushrooms!');
+  resetButton.position(430, 50);
+  resetButton.style('font-family', 'cursive');
+  resetButton.style('font-weight', 'bold');
+  resetButton.mousePressed(reset);
+
+  for (i = 0; i < 8; i++) { //create 8 random mushrooms to start
+    mushroomList.push(new Mushroom(random(50, 550), random(300, 550), random(mushroomColors)));
+  }
 }
 
 
 function draw() {
   background(skyBlue); //sky
 
-  drawCloud();
+  mushroomCounter.html('mushrooms picked: ' + mushroomCount);
   drawCloud();
 
   fill(slateGray);
@@ -48,9 +54,9 @@ function draw() {
   grassTuft(50, 350);
   grassTuft(350, 475);
 
-
-  mushy.drawSelf();
-  agaric.drawSelf();
+  for (i = 0; i < mushroomList.length; i++) { //go through all mushrooms that exist
+    mushroomList[i].drawSelf();
+  }
 }
 
 function grassTuft(x, y) { //makes tiny blades of grass in a tuft
@@ -77,14 +83,15 @@ function drawCloud() { //draws cloud and moves it across screen
 }
 
 class Mushroom { //mushroom class, takes x and y coordinates
-  constructor(x, y) {
+  constructor(x, y, color) {
     this.x = x;
     this.y = y;
+    this.color = color;
   }
   drawSelf() {
     fill(mushroomWhite);
     ellipse(this.x, this.y + 10, 20, 50); //mushroom stem
-    fill(mushroomRed);
+    fill(this.color);
     arc(this.x, this.y, 60, 50, PI, 0, CHORD); //mushroom cap
     fill(mushroomWhite);
     stroke(mushroomWhite);
@@ -96,4 +103,35 @@ class Mushroom { //mushroom class, takes x and y coordinates
     ellipse(this.x - 20, this.y - 8, 5, 5);
     ellipse(this.x + 20, this.y - 6, 5, 5);
   }
+  checkClick() {
+    const disX = this.x - mouseX;
+    const disYCap = this.y - mouseY;
+    const disYStem = this.y + 10 - mouseY;
+    if ((sqrt(sq(disX) + sq(disYCap)) < 60) && mouseY < this.y) {
+      return true;
+    } else if ((sqrt(sq(disX) + sq(disYStem)) < 50) && (mouseX > this.x - 10) && (mouseX < this.x + 10)) {
+      return true;
+    }
+  }
+}
+
+function mousePressed() {
+  for (i = 0; i < mushroomList.length; i++) {
+    if (mushroomList[i].checkClick()) {
+      mushroomList.splice(i, 1);
+      mushroomCount += 1;
+    }
+  }
+}
+
+function reset() {
+  if (mushroomList.length == 0){
+    for (i = 0; i < 8; i++) { //create 8 random mushrooms to start
+      mushroomList.push(new Mushroom(random(50, 550), random(300, 550), random(mushroomColors)));
+    }
+  }
+  else{
+    alert("there are still mushrooms to pick!");
+  }
+
 }
