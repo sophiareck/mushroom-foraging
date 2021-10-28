@@ -4,19 +4,29 @@ var darkGreen = '#314a1d';
 var mossGreen = '#8b8b3b';
 var slateGray = '#686d66';
 var mushroomWhite = '#FEFACB';
+var pluck;
+var forest;
+var music;
 
 var cloudX = 0;
 var mushroomList = []; //array to store mushrooms
 var mushroomColors = ['#DB1616', '#ff8c00', '#3783ff', '#fb7efd', '#7442c8']; // array of mushroom colors
 var mushroomCount = 0;
 
+function preload() {
+  soundFormats('mp3', 'ogg'); //loud sounds
+  pluck = loadSound('pluck'); //when mushroom is picked/grows back
+  forest = loadSound('forest'); //forest ambience
+  music = loadSound('music'); //soft calming music
+}
+
 function setup() {
   createCanvas(600, 600);
   noStroke();
-  mushroomCounter = createElement('p', 'mushrooms picked: ' + mushroomCount);
+  mushroomCounter = createElement('p', 'mushrooms picked: ' + mushroomCount); //mushroom counter
   mushroomCounter.position(400, -5);
 
-  resetButton = createButton('regrow the mushrooms!');
+  resetButton = createButton('regrow the mushrooms!'); //button to regrow mushrooms
   resetButton.position(430, 50);
   resetButton.style('font-family', 'cursive');
   resetButton.style('font-weight', 'bold');
@@ -25,6 +35,11 @@ function setup() {
   for (i = 0; i < 8; i++) { //create 8 random mushrooms to start
     mushroomList.push(new Mushroom(random(50, 550), random(300, 550), random(mushroomColors)));
   }
+  music.setVolume(.25); //adjusting volume of tracks for balance
+  pluck.setVolume(2);
+  forest.setVolume(.8);
+  forest.loop();
+  music.loop();
 }
 
 
@@ -81,7 +96,6 @@ function drawCloud() { //draws cloud and moves it across screen
     cloudX = cloudX + .25;
   }
 }
-
 class Mushroom { //mushroom class, takes x and y coordinates
   constructor(x, y, color) {
     this.x = x;
@@ -118,20 +132,23 @@ class Mushroom { //mushroom class, takes x and y coordinates
 function mousePressed() {
   for (i = 0; i < mushroomList.length; i++) {
     if (mushroomList[i].checkClick()) {
-      mushroomList.splice(i, 1);
-      mushroomCount += 1;
+      mushroomList.splice(i, 1); //remove mushroom from array
+      mushroomCount += 1; //increase mushroom count at top of screen
+      pluck.play(); //play pluck sound when mushroom is picked
     }
   }
 }
 
 function reset() {
-  if (mushroomList.length == 0){
+  if (mushroomList.length == 0) {
     for (i = 0; i < 8; i++) { //create 8 random mushrooms to start
       mushroomList.push(new Mushroom(random(50, 550), random(300, 550), random(mushroomColors)));
     }
-  }
-  else{
-    alert("there are still mushrooms to pick!");
+    for (i = 0; i < 15; i++) { //play intense, loud long-ish plucking sound when mushrooms grow back
+      pluck.play();
+    }
+  } else {
+    alert("there are still mushrooms to pick!"); //sends alert to user
   }
 
 }
